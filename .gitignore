@@ -1,0 +1,3 @@
+**/*.safetensors
+.env
+**/.venv/**
