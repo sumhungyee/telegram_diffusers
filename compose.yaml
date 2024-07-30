@@ -1,0 +1,17 @@
+---
+version: "1.0"
+services:
+
+  app:
+    image: sdapp
+    build: ./src
+    env_file:
+      - .env
+    
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
