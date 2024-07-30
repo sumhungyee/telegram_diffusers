@@ -1,11 +1,15 @@
 import torch
 import gc
+import os
 import PIL
 from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline, EulerAncestralDiscreteScheduler, DPMSolverSinglestepScheduler
 from compel import Compel, ReturnedEmbeddingsType
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_txt_to_img_pipeline(
-        path="./model/SDXLFaetastic_v24.safetensors", safety = False, scheduler = DPMSolverSinglestepScheduler
+        path=os.getenv("SDXL_PATH"), safety = False, scheduler = DPMSolverSinglestepScheduler
         ) -> StableDiffusionXLPipeline:
     pipeline: StableDiffusionXLPipeline = StableDiffusionXLPipeline.from_single_file(
         path,
