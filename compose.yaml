@@ -2,12 +2,11 @@
 version: "1.0"
 services:
 
-  app:
-    image: sdapp
-    build: ./src
+  diffusion-app:
+    image: diffusion-app
+    build: ./diffusion
     env_file:
       - .env
-    
     deploy:
       resources:
         reservations:

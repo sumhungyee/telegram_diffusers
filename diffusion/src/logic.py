@@ -1,12 +1,11 @@
 import torch
+import argparse
 import gc
 import os
 import PIL
 from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline, EulerAncestralDiscreteScheduler, DPMSolverSinglestepScheduler
 from compel import Compel, ReturnedEmbeddingsType
-from dotenv import load_dotenv
 
-load_dotenv()
 
 def get_txt_to_img_pipeline(
         path=os.getenv("SDXL_PATH"), safety = False, scheduler = DPMSolverSinglestepScheduler
@@ -17,7 +16,7 @@ def get_txt_to_img_pipeline(
     )
     if not safety:
         pipeline.safety_checker = None
-    pipeline.scheduler =  scheduler.from_config(pipeline.scheduler.config)
+    pipeline.scheduler = scheduler.from_config(pipeline.scheduler.config)
     pipeline = pipeline.to("cuda")
     return pipeline
 
@@ -54,7 +53,6 @@ def generate_image(pipeline, prompt, negative_prompt = "", image_type = "square"
         width = width, 
         num_inference_steps = num_inference_steps, 
         num_images_per_prompt = 1,
-        #guidance_scale=7.5
         ).images[0]
     
     return image
@@ -63,4 +61,13 @@ def clear_cache():
     gc.collect()
     torch.cuda.empty_cache()
 
-    
+def get_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', choices=["/generate"])
+    parser.add_argument('-p', '--prompt', type=str, required=True)
+    parser.add_argument('-n', '--negprompt', type=str, required=False, default="")
+    parser.add_argument(
+        '-o', '--orientation', type=str, choices=['landscape', 'portrait', 'square'], required=False, default="square"
+        )
+    parser.add_argument('-s', '--steps', type=int, choices=[10 * i for i in range(3, 10)], required=False, default=60)
+    return parser

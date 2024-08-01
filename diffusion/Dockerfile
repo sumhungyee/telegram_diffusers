@@ -3,8 +3,8 @@ FROM nvidia/cuda:11.8.0-devel-ubuntu20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 
-WORKDIR /src
-COPY app/ ./app
+WORKDIR /diffusion
+COPY src/ ./src
 COPY model/ ./model
 COPY requirements.txt ./
 
@@ -24,6 +24,6 @@ RUN rm -rf /tmp/Python-3.11.8*
 
 RUN python3.11 -m pip install --upgrade pip 
 
-RUN pip3.11 install -r requirements.txt
+RUN pip3 install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu118 && pip3.11 install -r requirements.txt
 
-CMD ["python3.11", "-m", "app.main"]
+CMD ["python3.11", "-m", "src.telebot"]

@@ -1,3 +1,4 @@
 **/*.safetensors
 .env
 **/.venv/**
+**/test.py
