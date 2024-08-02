@@ -19,6 +19,7 @@ bot = telebot.TeleBot(os.getenv("BOT_API"))
 bot.pipeline = pipeline
 queue = Queue()
 event = threading.Event()
+bot.in_session = False
 
 def execute_task(bot, msg, args):
     prompt = args.prompt
@@ -37,8 +38,10 @@ def answer_from_queue():
     while not event.is_set():
         if queue.qsize() >= 1:
             args, msg = queue.get()
+            bot.in_session = True
             execute_task(bot, msg, args)
             clear_cache()
+            bot.in_session = False
             time.sleep(0.1)
 
 answerer=threading.Thread(target=answer_from_queue)
@@ -53,7 +56,13 @@ def generate_telebot(msg):
         args = parser.parse_args(shlex.split(msg.text))
         currsize = queue.qsize()
         queue.put((args, msg))
-        bot.reply_to(msg, f"Job accepted. Please wait, there are currently {currsize} items in queue")
+
+        if bot.in_session:
+            to_append = " and currently processing one image."
+        else:
+            to_append = "."
+
+        bot.reply_to(msg, f"Job accepted. Please wait, there are currently {currsize} items in queue" + to_append)
     except:
         bot.reply_to(msg, "Request failed, format your prompt properly. See /help for a list of arguments")
 
