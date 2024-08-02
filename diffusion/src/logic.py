@@ -1,5 +1,4 @@
 import torch
-import random
 import argparse
 import gc
 import os
@@ -45,10 +44,8 @@ def generate_image(pipeline: DiffusionPipeline, prompt, random_seed, negative_pr
         negative_prompt_embeds, negative_pooled_prompt_embeds = compel(negative_prompt)
         prompt_embeds, negative_prompt_embeds = compel.pad_conditioning_tensors_to_same_length([prompt_embeds, negative_prompt_embeds])
     
-    if random_seed != -1:
-        generator = torch.Generator(device="cuda").manual_seed(random_seed)
-    else:
-        generator = torch.Generator(device="cuda").manual_seed(random.randint(0, 999999999))
+
+    generator = torch.Generator(device="cuda").manual_seed(random_seed)
 
     image: PIL.Image.Image = pipeline(
         prompt_embeds = prompt_embeds, 
