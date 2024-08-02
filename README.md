@@ -1,6 +1,6 @@
 # telegram_diffusers
 
-This project is a spiritual successor of an older project: Telegram_ai_gptq.
+This project is a spiritual successor of an older project: [Telegram_ai_gptq](https://github.com/sumhungyee/telegram_ai_gptq), alongside [Telegram_ai](https://github.com/sumhungyee/telegram_ai).
 
 ## Installation Guide
 
