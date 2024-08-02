@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from telebot.types import InputFile
 from queue import Queue
 
+import random
 import telebot
 import threading
 import time
@@ -27,12 +28,15 @@ def execute_task(bot, msg, args):
     orientation = args.orientation
     steps = args.steps
     random_seed = args.randomseed
-    image = generate_image(pipeline, prompt, negative_prompt=negprompt, image_type=orientation, num_inference_steps=steps, random_seed=random_seed)
+    
+    new_rs = random.randint(0, 999999999) if random_seed == -1 else random_seed
+    
+    image = generate_image(pipeline, prompt, new_rs, negative_prompt=negprompt, image_type=orientation, num_inference_steps=steps)
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format='PNG')
     img_byte_arr = img_byte_arr.getvalue()
     file = io.BytesIO(img_byte_arr)
-    bot.reply_to(msg, "Done, here you go!")
+    bot.reply_to(msg, f"Done, here you go! Seed: {new_rs}")
     bot.send_photo(msg.chat.id, InputFile(file), has_spoiler=True)
 
 

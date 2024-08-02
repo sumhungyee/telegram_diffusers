@@ -1,4 +1,5 @@
 import torch
+import random
 import argparse
 import gc
 import os
@@ -20,7 +21,7 @@ def get_txt_to_img_pipeline(
     pipeline = pipeline.to("cuda")
     return pipeline
 
-def generate_image(pipeline: DiffusionPipeline, prompt, negative_prompt = "", image_type = "square", num_inference_steps = 60, random_seed = -1) -> PIL.Image.Image:
+def generate_image(pipeline: DiffusionPipeline, prompt, random_seed, negative_prompt = "", image_type = "square", num_inference_steps = 60) -> PIL.Image.Image: # random seed will always be filled
 
     match image_type:
         case "square":
@@ -47,7 +48,7 @@ def generate_image(pipeline: DiffusionPipeline, prompt, negative_prompt = "", im
     if random_seed != -1:
         generator = torch.Generator(device="cuda").manual_seed(random_seed)
     else:
-        generator = None
+        generator = torch.Generator(device="cuda").manual_seed(random.randint(0, 999999999))
 
     image: PIL.Image.Image = pipeline(
         prompt_embeds = prompt_embeds, 
