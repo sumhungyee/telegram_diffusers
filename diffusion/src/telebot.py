@@ -1,4 +1,4 @@
-from diffusion.src.logic import get_txt_to_img_pipeline, generate_image, clear_cache, get_parser
+from src.logic import get_txt_to_img_pipeline, generate_image, clear_cache, get_parser, replace_curly_quotes
 from dotenv import load_dotenv
 from telebot.types import InputFile
 from queue import Queue
@@ -10,17 +10,11 @@ import os
 import io
 import shlex
 
-#  parser.add_argument('command', choices=["/generate"])
-#     parser.add_argument('-p', '--prompt', type=str, required=True)
-#     parser.add_argument('-n', '--negprompt', type=str, required=False, default="")
-#     parser.add_argument(
-#         '-o', '--orientation', type=str, choices=['landscape', 'portrait', 'square'], required=False, default="square"
-#         )
-#     parser.add_argument('-s', '--steps', type=int, choices=[10 * i for i in range(3, 10)], required=False, default=60)
+
 
 load_dotenv()
 pipeline = get_txt_to_img_pipeline()
-parser = get_parser()
+
 bot = telebot.TeleBot(os.getenv("BOT_API"))
 bot.pipeline = pipeline
 queue = Queue()
@@ -44,6 +38,7 @@ def answer_from_queue():
         if queue.qsize() >= 1:
             args, msg = queue.get()
             execute_task(bot, msg, args)
+            clear_cache()
             time.sleep(0.1)
 
 answerer=threading.Thread(target=answer_from_queue)
@@ -52,12 +47,14 @@ answerer.start()
 
 @bot.message_handler(commands = ["generate"])
 def generate_telebot(msg):
+    parser = get_parser()
+    msg.text = replace_curly_quotes(msg.text)
     try:
         args = parser.parse_args(shlex.split(msg.text))
         currsize = queue.qsize()
-        queue.put(args, msg)
+        queue.put((args, msg))
         bot.reply_to(msg, f"Job accepted. Please wait, there are currently {currsize} items in queue")
-    except Exception as e:
+    except:
         bot.reply_to(msg, "Request failed, format your prompt properly. See /help for a list of arguments")
 
 @bot.message_handler(commands = ["help"])
@@ -71,3 +68,6 @@ def get_help(msg):
     Example usage: /generate -p 'A big chocolate bar' --negprompt "monochrome" -s 50
     """
     bot.reply_to(msg, help_str)
+
+
+bot.infinity_polling(timeout = 10, long_polling_timeout=5)

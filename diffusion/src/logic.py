@@ -71,3 +71,16 @@ def get_parser():
         )
     parser.add_argument('-s', '--steps', type=int, choices=[10 * i for i in range(3, 10)], required=False, default=60)
     return parser
+
+def replace_curly_quotes(input_string):
+    replacements = {
+        '‘': "'",
+        '’': "'",
+        '“': '"',
+        '”': '"'
+    }
+    
+    for curly_quote, straight_quote in replacements.items():
+        input_string = input_string.replace(curly_quote, straight_quote)
+    
+    return input_string
