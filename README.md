@@ -41,4 +41,5 @@ docker-compose up
         2. --negprompt, or -n (optional), defaults to empty.
         3. --orientation, or -o (optional), defaults to square image. Available: landscape, portrait, square (lowercase)
         4. --steps, or -s (optional), defaults to 60.
-        5. Example usage: /generate -p 'A big chocolate bar' --negprompt "monochrome" -s 50
+        5. --randomseed, or -s (optional), defaults to -1 (random). Controls the randomisation of the image.
+        - Example usage: /generate -p 'A big chocolate bar' --negprompt "monochrome" -s 50
