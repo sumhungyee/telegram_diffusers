@@ -3,7 +3,7 @@ import argparse
 import gc
 import os
 import PIL
-from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline, EulerAncestralDiscreteScheduler, DPMSolverSinglestepScheduler
+from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline, EulerAncestralDiscreteScheduler, DPMSolverSinglestepScheduler, DiffusionPipeline
 from compel import Compel, ReturnedEmbeddingsType
 
 
@@ -20,7 +20,7 @@ def get_txt_to_img_pipeline(
     pipeline = pipeline.to("cuda")
     return pipeline
 
-def generate_image(pipeline, prompt, negative_prompt = "", image_type = "square", num_inference_steps = 60) -> PIL.Image.Image:
+def generate_image(pipeline: DiffusionPipeline, prompt, negative_prompt = "", image_type = "square", num_inference_steps = 60, random_seed = -1) -> PIL.Image.Image:
 
     match image_type:
         case "square":
@@ -43,7 +43,12 @@ def generate_image(pipeline, prompt, negative_prompt = "", image_type = "square"
         prompt_embeds, pooled_prompt_embeds = compel(prompt)
         negative_prompt_embeds, negative_pooled_prompt_embeds = compel(negative_prompt)
         prompt_embeds, negative_prompt_embeds = compel.pad_conditioning_tensors_to_same_length([prompt_embeds, negative_prompt_embeds])
-        
+    
+    if random_seed != -1:
+        generator = torch.Generator(device="cuda").manual_seed(random_seed)
+    else:
+        generator = None
+
     image: PIL.Image.Image = pipeline(
         prompt_embeds = prompt_embeds, 
         pooled_prompt_embeds = pooled_prompt_embeds, 
@@ -53,6 +58,7 @@ def generate_image(pipeline, prompt, negative_prompt = "", image_type = "square"
         width = width, 
         num_inference_steps = num_inference_steps, 
         num_images_per_prompt = 1,
+        generator=generator
         ).images[0]
     
     return image
@@ -70,6 +76,7 @@ def get_parser():
         '-o', '--orientation', type=str, choices=['landscape', 'portrait', 'square'], required=False, default="square"
         )
     parser.add_argument('-s', '--steps', type=int, choices=[10 * i for i in range(3, 10)], required=False, default=60)
+    parser.add_argument('-r', '--randomseed', type=int, required=False, default=-1)
     return parser
 
 def replace_curly_quotes(input_string):

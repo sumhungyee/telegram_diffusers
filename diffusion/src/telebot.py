@@ -26,11 +26,13 @@ def execute_task(bot, msg, args):
     negprompt = args.negprompt
     orientation = args.orientation
     steps = args.steps
-    image = generate_image(pipeline, prompt, negative_prompt=negprompt, image_type=orientation, num_inference_steps=steps)
+    random_seed = args.randomseed
+    image = generate_image(pipeline, prompt, negative_prompt=negprompt, image_type=orientation, num_inference_steps=steps, random_seed=random_seed)
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format='PNG')
     img_byte_arr = img_byte_arr.getvalue()
     file = io.BytesIO(img_byte_arr)
+    bot.reply_to(msg, "Done, here you go!")
     bot.send_photo(msg.chat.id, InputFile(file), has_spoiler=True)
 
 
@@ -74,6 +76,7 @@ def get_help(msg):
     --negprompt, or -n (optional), defaults to empty.
     --orientation, or -o (optional), defaults to square image. Available: landscape, portrait, square (lowercase)
     --steps, or -s (optional), defaults to 60.
+    --randomseed, or -r (optional). Value must be an integer. Defaults to -1 which will result in randomness.
     Example usage: /generate -p 'A big chocolate bar' --negprompt "monochrome" -s 50
     """
     bot.reply_to(msg, help_str)
